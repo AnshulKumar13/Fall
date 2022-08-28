@@ -33,14 +33,20 @@ def main():
     
     gameState = 1
     newBlock = 0
+    clean = 1 / TICK_INTERVAL
     while gameState:
         if newBlock == 0:
             newBlock = createNewBlock(canvas)
+
+        if clean == 0:
+            cleanBlocks(canvas)
+            clean = 1 / TICK_INTERVAL
 
         updateBlockPositions(canvas)
         updateBasePosition(canvas, base)
         
         newBlock -= 1
+        clean -= 1
         window.update_idletasks()
         window.update()
         time.sleep(TICK_INTERVAL)
@@ -49,7 +55,7 @@ def createNewBlock(canvas = tk.Canvas):
     x = int(rnd.random() * WIDTH)
     y = 0
     rec = canvas.create_rectangle(x, y, x + 10, y + 10, fill = BLOCK_COLOR)
-    blocks.append([rec, 90])
+    blocks.append([rec, 170])
     return ((1/TICK_INTERVAL)/2) + int(rnd.random() * ((1/TICK_INTERVAL)/2))
 
 def updateBlockPositions(canvas = tk.Canvas):
@@ -59,11 +65,19 @@ def updateBlockPositions(canvas = tk.Canvas):
         pxlsPerTick = block[1] / (1 / TICK_INTERVAL)
         canvas.move(block[0], 0, pxlsPerTick)
 
-        if canvas.coords(block[0])[1] <= 0:
+        if len(canvas.coords(block[0])) > 0 and canvas.coords(block[0])[1] >= HEIGHT:
             canvas.delete(block[0])
+
+def cleanBlocks(canvas = tk.Canvas):
+    i = 0
+    while i < len(blocks):
+        block = blocks[i]
+        if len(canvas.coords(block[0])) == 0:
             blocks.pop(i)
             i -= 1
-            length -= 1
+        i += 1
+
+    print("cleaned... New Length: " + str(len(blocks)))
 
 def updateBasePosition(canvas = tk.Canvas, base = int):
     global leftKeyPressed, rightKeyPressed
